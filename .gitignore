@@ -1,0 +1,16 @@
+*.suo
+*~
+*.lst
+*.o
+*.eep
+*.elf
+*.hex
+*.lss
+*.map
+*.sym
+*/Debug/
+*/Release/
+*.dep
+*.user
+*.opensdf
+*.sdf
