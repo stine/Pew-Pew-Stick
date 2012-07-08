@@ -11,12 +11,6 @@ int8_t usb_gamepad_send(void);
 
 extern uint8_t gamepad_buttons[2];
 
-// This file does not include the HID debug functions, so these empty
-// macros replace them with nothing, so users can compile code that
-// has calls to these functions.
-#define usb_debug_putchar(c)
-#define usb_debug_flush_output()
-
 // Everything below this point is only intended for usb_serial.c
 #ifdef USB_SERIAL_PRIVATE_INCLUDE
 #include <avr/io.h>

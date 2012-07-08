@@ -32,26 +32,11 @@
  *
  **************************************************************************/
 
-// You can change these to give your code its own name.
-#define STR_MANUFACTURER	L"Martins Grunskis"
-#define STR_PRODUCT		L"Gamepad"
-
-
-// Mac OS-X and Linux automatically load the correct drivers.  On
-// Windows, even though the driver is supplied by Microsoft, an
-// INF file is needed to load the driver.  These numbers need to
-// match the INF file.
-#define VENDOR_ID		0x16C0
-#define PRODUCT_ID		0x047C
-
-
-// USB devices are supposed to implment a halt feature, which is
-// rarely (if ever) used.  If you comment this line out, the halt
-// code will be removed, saving 102 bytes of space (gcc 4.3.0).
-// This is not strictly USB compliant, but works with all major
-// operating systems.
-//#define SUPPORT_ENDPOINT_HALT
-
+#define STR_MANUFACTURER	L"Matt Stine"
+#define STR_PRODUCT		L"Pew Pew Stick"
+#define VENDOR_ID		0xDEAD
+#define PRODUCT_ID		0xBEEF
+#define SUPPORT_ENDPOINT_HALT
 
 
 /**************************************************************************
@@ -64,7 +49,7 @@
 
 #define GAMEPAD_INTERFACE	0
 #define GAMEPAD_ENDPOINT	3
-#define GAMEPAD_SIZE		8
+#define GAMEPAD_SIZE		4
 #define GAMEPAD_BUFFER		EP_DOUBLE_BUFFER
 
 static const uint8_t PROGMEM endpoint_config_table[] = {
@@ -91,14 +76,14 @@ static const uint8_t PROGMEM endpoint_config_table[] = {
 const static uint8_t PROGMEM device_descriptor[] = {
 	18,					// bLength
 	1,					// bDescriptorType
-	0x00, 0x02,				// bcdUSB
+	LSB(0x0200), MSB(0x0200),       	// bcdUSB
 	0,					// bDeviceClass
 	0,					// bDeviceSubClass
 	0,					// bDeviceProtocol
 	ENDPOINT0_SIZE,				// bMaxPacketSize0
 	LSB(VENDOR_ID), MSB(VENDOR_ID),		// idVendor
 	LSB(PRODUCT_ID), MSB(PRODUCT_ID),	// idProduct
-	0x00, 0x01,				// bcdDevice
+	LSB(0x0100), MSB(0x0100),		// bcdDevice
 	1,					// iManufacturer
 	2,					// iProduct
 	0,					// iSerialNumber
@@ -128,27 +113,26 @@ const static uint8_t PROGMEM gamepad_hid_report_desc[] = {
 	0x95, 0x0C,        //   REPORT_COUNT (12)
 	0x81, 0x02,        //   INPUT (Data,Var,Abs)
 	0x95, 0x04,        //   REPORT_COUNT (4)
-    0x81, 0x03,        //   INPUT (Constant,Var,Abs)
+        0x81, 0x03,        //   INPUT (Constant,Var,Abs)
 	0xc0               // END_COLLECTION
 };
 
 
 #define CONFIG1_DESC_SIZE        (9+9+9+7)
-#define GAMEPAD_HID_DESC_OFFSET (9+9)
+#define GAMEPAD_HID_DESC_OFFSET  (9+9)
 const static uint8_t PROGMEM config1_descriptor[CONFIG1_DESC_SIZE] = {
 	// configuration descriptor, USB spec 9.6.3, page 264-266, Table 9-10
 	9, 					// bLength;
-	2,					// bDescriptorType;
-	LSB(CONFIG1_DESC_SIZE),			// wTotalLength
-	MSB(CONFIG1_DESC_SIZE),
+	0x02,					// bDescriptorType;
+	LSB(CONFIG1_DESC_SIZE), MSB(CONFIG1_DESC_SIZE), // wTotalLength
 	1,					// bNumInterfaces
 	1,					// bConfigurationValue
 	0,					// iConfiguration
 	0x80,					// bmAttributes
-	50,					// bMaxPower
+	100,					// bMaxPower
 	// interface descriptor, USB spec 9.6.5, page 267-269, Table 9-12
 	9,					// bLength
-	4,					// bDescriptorType
+	0x04,					// bDescriptorType
 	GAMEPAD_INTERFACE,			// bInterfaceNumber
 	0,					// bAlternateSetting
 	1,					// bNumEndpoints
@@ -159,7 +143,7 @@ const static uint8_t PROGMEM config1_descriptor[CONFIG1_DESC_SIZE] = {
 	// HID interface descriptor, HID 1.11 spec, section 6.2.1
 	9,					// bLength
 	0x21,					// bDescriptorType
-	0x11, 0x01,				// bcdHID
+	LSB(0x0111), MSB(0x0111),		// bcdHID
 	0,					// bCountryCode
 	1,					// bNumDescriptors
 	0x22,					// bDescriptorType
@@ -170,7 +154,7 @@ const static uint8_t PROGMEM config1_descriptor[CONFIG1_DESC_SIZE] = {
 	5,					// bDescriptorType
 	GAMEPAD_ENDPOINT | 0x80,		// bEndpointAddress
 	0x03,					// bmAttributes (0x03=intr)
-	GAMEPAD_SIZE, 0,			// wMaxPacketSize
+	LSB(GAMEPAD_SIZE), MSB(GAMEPAD_SIZE),   // wMaxPacketSize
 	1					// bInterval
 };
 
@@ -295,7 +279,7 @@ int8_t usb_gamepad_send(void) {
 	}
 	UEDATX = joystick_x;
 	UEDATX = joystick_y;
-    UEDATX = gamepad_buttons[0];
+	UEDATX = gamepad_buttons[0];
 	UEDATX = gamepad_buttons[1];
 	UEINTX = 0x3A;
 	SREG = intr_state;
