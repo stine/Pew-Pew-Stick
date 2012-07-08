@@ -23,6 +23,7 @@
 
 #define USB_SERIAL_PRIVATE_INCLUDE
 
+#include "usb_profiles.h"
 #include "usb_gamepad.h"
 #include "string.h"
 
@@ -365,13 +366,13 @@ ISR(USB_COM_vect)
 					return;
 				}
 				desc_val = pgm_read_word(list);
-				if (desc_val != wValue) {
+				if (desc_val != wValue) { // find descriptor with correct wValue.
 					list += sizeof(struct descriptor_list_struct);
 					continue;
 				}
 				list += 2;
 				desc_val = pgm_read_word(list);
-				if (desc_val != wIndex) {
+				if (desc_val != wIndex) { // find descriptor with correct wIndex.
 					list += sizeof(struct descriptor_list_struct)-2;
 					continue;
 				}

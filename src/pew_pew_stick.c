@@ -36,7 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define LED_CONFIG	(DDRD |= (1<<6))
 #define CPU_PRESCALE(n)	(CLKPR = 0x80, CLKPR = (n))
 
-char pins[MSG_LEN_BYTES];
+uint8_t pins[MSG_LEN_BYTES];
 
 int main(void)
 {
