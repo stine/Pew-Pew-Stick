@@ -42,7 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EP_DOUBLE_BUFFER        0x06
 
 #define GAMEPAD_INTERFACE	0
-#define GAMEPAD_ENDPOINT	3
+#define GAMEPAD_ENDPOINT_IN	1
+#define GAMEPAD_ENDPOINT_OUT    2
 #define GAMEPAD_SIZE		4
 #define GAMEPAD_BUFFER		EP_DOUBLE_BUFFER
 
@@ -136,7 +137,7 @@ const static uint8_t PROGMEM config1_descriptor[CONFIG1_DESC_SIZE] = {
 	// endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
 	7,					// bLength
 	5,					// bDescriptorType
-	GAMEPAD_ENDPOINT | 0x80,		// bEndpointAddress
+	GAMEPAD_ENDPOINT_IN | 0x80,		// bEndpointAddress
 	0x03,					// bmAttributes (0x03=intr)
 	LSB(GAMEPAD_SIZE), MSB(GAMEPAD_SIZE),   // wMaxPacketSize
 	1					// bInterval
@@ -196,8 +197,10 @@ int get_endpoint_table(
     *endptTableLenOut = sizeof(endpoint_config_table);
     return 0;
   case SP_PS3:
+    // TODO.
     return 1;
   case SP_X360:
+    // TODO.
     return 1;
   default:
     return 1;
@@ -205,23 +208,61 @@ int get_endpoint_table(
 }
 
 
-int get_descriptor_table(
+int get_descriptor(
   Profile profile,
   uint16_t wValue,
   uint16_t wIndex,
   const uint8_t **descTableAddrOut,
   uint8_t *descTableLenOut)
 {
+  const uint8_t *list;
+  uint16_t desc_val;
+  uint8_t i;
+
+  // Prepare the appropriate descriptor table.
   switch (profile) {
   case SP_PC:
-    // TODO.
-    return 0;
+    list = (const uint8_t *)descriptor_list;
+    break;
   case SP_PS3:
-    return 1;
+    // TODO.
+    break;
   case SP_X360:
-    return 1;
+    // TODO.
+    break;
   default:
     return 1;
+  }
+
+  // Loop over descriptor entries in table.
+  for (i=0; ; i++) {
+
+    // Check to see if we've overrun the table. If so, not found.
+    if (i >= NUM_DESC_LIST) {
+      return 1;
+    }
+
+    // Compare the wValue from this entry.
+    desc_val = pgm_read_word(list);
+    if (desc_val != wValue) {
+      list += sizeof(struct descriptor_list_struct);
+      continue;
+    }
+
+    // Compare the wIndex from this entry.
+    list += 2;
+    desc_val = pgm_read_word(list);
+    if (desc_val != wIndex) {
+      list += sizeof(struct descriptor_list_struct)-2;
+      continue;
+    }
+
+    // We've found it; return the address and length.
+    list += 2;
+    *descTableAddrOut = (const uint8_t *)pgm_read_word(list);
+    list += 2;
+    *descTableLenOut = pgm_read_byte(list);
+    return 0;
   }
 }
 

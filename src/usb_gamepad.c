@@ -328,7 +328,6 @@ static inline void usb_ack_out(void)
 ISR(USB_COM_vect)
 {
         uint8_t intbits;
-	const uint8_t *list;
         const uint8_t *cfg;
 	uint8_t i, n, len, en;
 	uint8_t bmRequestType;
@@ -336,11 +335,10 @@ ISR(USB_COM_vect)
 	uint16_t wValue;
 	uint16_t wIndex;
 	uint16_t wLength;
-	uint16_t desc_val;
 	const uint8_t *endpt_table_addr;
 	uint8_t endpt_table_len;
 	const uint8_t *desc_addr;
-	uint8_t	desc_length;
+	uint8_t	desc_len;
 
         UENUM = 0;
 	intbits = UEINTX;
@@ -355,31 +353,13 @@ ISR(USB_COM_vect)
                 wLength |= (UEDATX << 8);
                 UEINTX = ~((1<<RXSTPI) | (1<<RXOUTI) | (1<<TXINI));
                 if (bRequest == GET_DESCRIPTOR) {
-			list = (const uint8_t *)descriptor_list;
-			for (i=0; ; i++) {
-				if (i >= NUM_DESC_LIST) {
-					UECONX = (1<<STALLRQ)|(1<<EPEN);  //stall
-					return;
-				}
-				desc_val = pgm_read_word(list);
-				if (desc_val != wValue) { // find descriptor with correct wValue.
-					list += sizeof(struct descriptor_list_struct);
-					continue;
-				}
-				list += 2;
-				desc_val = pgm_read_word(list);
-				if (desc_val != wIndex) { // find descriptor with correct wIndex.
-					list += sizeof(struct descriptor_list_struct)-2;
-					continue;
-				}
-				list += 2;
-				desc_addr = (const uint8_t *)pgm_read_word(list);
-				list += 2;
-				desc_length = pgm_read_byte(list);
-				break;
+		        if (get_descriptor(SP_PC, wValue, wIndex, &desc_addr, &desc_len)) {
+			        // Couldn't find descriptor.  Stall and return.
+			        UECONX = (1<<STALLRQ)|(1<<EPEN);
+				return;
 			}
 			len = (wLength < 256) ? wLength : 255;
-			if (len > desc_length) len = desc_length;
+			if (len > desc_len) len = desc_len;
 			do {
 				// wait for host ready for IN packet
 				do {
