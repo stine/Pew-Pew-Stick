@@ -1,6 +1,6 @@
 /*
   Pew Pew Stick Microcontroller Code
-  Copyright (c) 2012, Matt Stine
+  Copyright (c) 2012, Matt Stine, Brandon Booth
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -24,15 +24,31 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef __CONTROLLER_INTERFACE_H__
-#define __CONTROLLER_INTERFACE_H__
+#ifndef __CONTROLLER__
+#define __CONTROLLER__
 
 #include "pins.h"
+#include <stdint.h>
+
+// Base controller that routes function calls to the appropriate
+// controller implementation based on the input enum during
+// initialization.
+
+enum ControllerType
+{
+  SERIAL_TYPE,
+  PARALLEL_TYPE
+};
+
+struct Controller
+{
+  enum ControllerType controllerType;
+};
 
 // Must be called once to initialize the controller interface.
-void init_controller(void);
+void init_controller(struct Controller* controller, enum ControllerType controllerType);
 
 // Returns the state of joystick and buttons.
-void get_controller(uint8_t pins[MSG_LEN_BYTES]);
+void get_controller_state(struct Controller* controller, uint8_t pins[MSG_LEN_BYTES]);
 
 #endif
