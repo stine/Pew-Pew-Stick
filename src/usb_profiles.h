@@ -28,6 +28,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdint.h>
 
+// Common definitions used by all endpoints/descriptors.
+#define ENDPOINT0_SIZE		32
+#define GAMEPAD_INTERFACE	0
+#define GAMEPAD_ENDPOINT_IN	1
+#define GAMEPAD_ENDPOINT_OUT    2
+
+// Type of USB Host to interface with.
 typedef enum profile {
   SP_PC,
   SP_PS3,
