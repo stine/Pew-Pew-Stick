@@ -47,7 +47,7 @@ void init_controller_serial(void)
   PORTD |= (1<<PD1);
 }
 
-void get_controller_state_serial(uint8_t pins[MSG_LEN_BYTES])
+void get_controller_state_serial(uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
 {
   // Set SH/LD low.
   PORTD &= ~(1<<PD1);
@@ -61,7 +61,7 @@ void get_controller_state_serial(uint8_t pins[MSG_LEN_BYTES])
 
   // Drop CLK INH, Load 8 bits from MISO, set CLK INH high again.
   PORTB &= ~(1<<PB0);
-  for (unsigned i = 0; i < MSG_LEN_BYTES; ++i)
+  for (unsigned i = 0; i < NUM_CONTROLLER_STATE_BYTES; ++i)
     {
       SPDR = 0x00;
       while (!(SPSR & (1<<SPIF)));

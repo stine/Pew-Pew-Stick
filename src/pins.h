@@ -27,10 +27,10 @@
 #ifndef __PINS_H__
 #define __PINS_H__
 
-/* Number of bytes to describe all inputs over SPI */
-#define MSG_LEN_BYTES 2
+/* Number of bytes to store controller state */
+#define NUM_CONTROLLER_STATE_BYTES 2
 
-/* First Byte over SPI */
+/* First controller state byte's bit assignment */
 #define B_05 (1<<7)
 #define B_06 (1<<6)
 #define B_07 (1<<5)
@@ -40,7 +40,7 @@
 #define B_11 (1<<1)
 #define B_12 (1<<0)
 
-/* Second Byte over SPI */
+/* Second controller state byte's bit assignment */
 #define D_LT (1<<7)
 #define D_RT (1<<6)
 #define D_UP (1<<5)

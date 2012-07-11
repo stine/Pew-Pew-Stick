@@ -36,7 +36,7 @@ void init_controller_parallel(void)
   PORTD |= (PIND_01);
 }
 
-void get_controller_state_parallel(uint8_t pins[MSG_LEN_BYTES])
+void get_controller_state_parallel(uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
 {
   pins[0] = 0;
   pins[1] = 0;

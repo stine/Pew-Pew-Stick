@@ -44,7 +44,7 @@ void init_controller(struct Controller* controller, enum ControllerType controll
   }
 }
 
-void get_controller_state(struct Controller* controller, uint8_t pins[MSG_LEN_BYTES])
+void get_controller_state(struct Controller* controller, uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
 {
   switch(controller->controllerType)
   {

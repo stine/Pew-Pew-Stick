@@ -49,6 +49,6 @@ struct Controller
 void init_controller(struct Controller* controller, enum ControllerType controllerType);
 
 // Returns the state of joystick and buttons.
-void get_controller_state(struct Controller* controller, uint8_t pins[MSG_LEN_BYTES]);
+void get_controller_state(struct Controller* controller, uint8_t pins[NUM_CONTROLLER_STATE_BYTES]);
 
 #endif

@@ -36,6 +36,6 @@
 void init_controller_serial(void);
 
 // Returns the state of joystick and buttons.
-void get_controller_state_serial(uint8_t pins[MSG_LEN_BYTES]);
+void get_controller_state_serial(uint8_t pins[NUM_CONTROLLER_STATE_BYTES]);
 
 #endif
