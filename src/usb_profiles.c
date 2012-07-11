@@ -24,7 +24,9 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 #include "usb_profiles.h"
-
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#include <avr/interrupt.h>
 
 /**************************************************************************
  * PC Profile Descriptors
@@ -36,15 +38,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PRODUCT_ID		0xBEEF
 
 #define ENDPOINT0_SIZE		32
+#define EP_TYPE_INTERRUPT_IN	0xC1
+#define EP_DOUBLE_BUFFER        0x06
 
 #define GAMEPAD_INTERFACE	0
 #define GAMEPAD_ENDPOINT	3
 #define GAMEPAD_SIZE		4
 #define GAMEPAD_BUFFER		EP_DOUBLE_BUFFER
 
+#define LSB(n) (n & 255)
+#define MSB(n) ((n >> 8) & 255)
+#define EP_SIZE(s)	((s) == 64 ? 0x30 :	\
+			((s) == 32 ? 0x20 :	\
+			((s) == 16 ? 0x10 :	\
+			             0x00)))
+
 static const uint8_t PROGMEM endpoint_config_table[] = {
-	1, EP_TYPE_INTERRUPT_IN,  EP_SIZE(GAMEPAD_SIZE) | GAMEPAD_BUFFER,
-	0,
+  1, EP_TYPE_INTERRUPT_IN,  EP_SIZE(GAMEPAD_SIZE) | GAMEPAD_BUFFER,  // First endpoint is IN
+  0, // Second (optional) endpoint is OUT
 };
 
 const static uint8_t PROGMEM device_descriptor[] = {
@@ -174,36 +185,64 @@ const static struct descriptor_list_struct {
 #define NUM_DESC_LIST (sizeof(descriptor_list)/sizeof(struct descriptor_list_struct))
 
 
-
 int get_endpoint_table(
   Profile profile,
-  const uint8_t tableOut[])
+  const uint8_t **endptTableAddrOut,
+  uint8_t *endptTableLenOut)
 {
-
-  return 0;
+  switch (profile) {
+  case SP_PC:
+    *endptTableAddrOut = endpoint_config_table;
+    *endptTableLenOut = sizeof(endpoint_config_table);
+    return 0;
+  case SP_PS3:
+    return 1;
+  case SP_X360:
+    return 1;
+  default:
+    return 1;
+  }
 }
 
-int get_descriptor(
+
+int get_descriptor_table(
   Profile profile,
   uint16_t wValue,
   uint16_t wIndex,
-  const uint8_t **descAddrOut,
-  const uint8_t *descLenOut)
+  const uint8_t **descTableAddrOut,
+  uint8_t *descTableLenOut)
 {
-
-  return 0;
+  switch (profile) {
+  case SP_PC:
+    // TODO.
+    return 0;
+  case SP_PS3:
+    return 1;
+  case SP_X360:
+    return 1;
+  default:
+    return 1;
+  }
 }
 
 uint8_t get_report_size(
   Profile profile)
 {
-
-  return 0;
+  switch (profile) {
+  case SP_PC:
+    return 0;
+  case SP_PS3:
+    return 0;
+  case SP_X360:
+    return 0;
+  default:
+    return 0;
+  }
 }
 
 int format_report(
   Profile profile,
-  uint8_t rawControl[],
+  const uint8_t rawControl[],
   uint8_t rawControlLen,
   uint8_t reportOut[])
 {

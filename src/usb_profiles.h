@@ -34,23 +34,29 @@ typedef enum profile {
   SP_X360
 } Profile;
 
+// Retrieves a pointer to the appropriate Endpoint Table.
 int get_endpoint_table(
   Profile profile,
-  const uint8_t tableOut[]);
+  const uint8_t **endptTableAddrOut, // Pointer to PROGMEM
+  uint8_t *endptTableLenOut);
 
+// Retrieves a pointer to the appropriate Descriptor.
 int get_descriptor(
   Profile profile,
   uint16_t wValue,
   uint16_t wIndex,
-  const uint8_t **descAddrOut,
+  const uint8_t **descAddrOut, // Pointer to PROGMEM
   uint8_t *descLenOut);
 
+// Gets the USB report size for the specified system.
 uint8_t get_report_size(
   Profile profile);
 
+// Formats provided raw data into the appropriate USB report format.
+// User-provided 'reportOut' must be 'get_report_size()' bytes long.
 int format_report(
   Profile profile,
-  uint8_t rawControl[],
+  const uint8_t rawControl[], // Currently: U, D, L, R, Buttons 1-8, start, select/coin, home
   uint8_t rawControlLen,
   uint8_t reportOut[]);
 

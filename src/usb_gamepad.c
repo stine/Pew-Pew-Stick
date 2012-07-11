@@ -49,16 +49,10 @@
 #define ENDPOINT0_SIZE		32
 
 #define GAMEPAD_INTERFACE	0
-#define GAMEPAD_ENDPOINT	3
+#define GAMEPAD_ENDPOINT_IN     1
+#define GAMEPAD_ENDPOINT_OUT    2
 #define GAMEPAD_SIZE		4
 #define GAMEPAD_BUFFER		EP_DOUBLE_BUFFER
-
-static const uint8_t PROGMEM endpoint_config_table[] = {
-	0,
-	0,
-	1, EP_TYPE_INTERRUPT_IN,  EP_SIZE(GAMEPAD_SIZE) | GAMEPAD_BUFFER,
-	0
-};
 
 
 /**************************************************************************
@@ -153,7 +147,7 @@ const static uint8_t PROGMEM config1_descriptor[CONFIG1_DESC_SIZE] = {
 	// endpoint descriptor, USB spec 9.6.6, page 269-271, Table 9-13
 	7,					// bLength
 	5,					// bDescriptorType
-	GAMEPAD_ENDPOINT | 0x80,		// bEndpointAddress
+	GAMEPAD_ENDPOINT_IN | 0x80,		// bEndpointAddress
 	0x03,					// bmAttributes (0x03=intr)
 	LSB(GAMEPAD_SIZE), MSB(GAMEPAD_SIZE),   // wMaxPacketSize
 	1					// bInterval
@@ -263,7 +257,7 @@ int8_t usb_gamepad_send(void) {
 	if (!usb_configuration) return -1;
 	intr_state = SREG;
 	cli();
-	UENUM = GAMEPAD_ENDPOINT;
+	UENUM = GAMEPAD_ENDPOINT_IN;
 	timeout = UDFNUML + 50;
 	while (1) {
 		// are we ready to transmit?
@@ -276,7 +270,7 @@ int8_t usb_gamepad_send(void) {
 		// get ready to try checking again
 		intr_state = SREG;
 		cli();
-		UENUM = GAMEPAD_ENDPOINT;
+		UENUM = GAMEPAD_ENDPOINT_IN;
 	}
 	UEDATX = joystick_x;
 	UEDATX = joystick_y;
@@ -343,6 +337,8 @@ ISR(USB_COM_vect)
 	uint16_t wIndex;
 	uint16_t wLength;
 	uint16_t desc_val;
+	const uint8_t *endpt_table_addr;
+	uint8_t endpt_table_len;
 	const uint8_t *desc_addr;
 	uint8_t	desc_length;
 
@@ -409,16 +405,18 @@ ISR(USB_COM_vect)
 		if (bRequest == SET_CONFIGURATION && bmRequestType == 0) {
 			usb_configuration = wValue;
 			usb_send_in();
-			cfg = endpoint_config_table;
-			for (i=1; i<5; i++) {
-				UENUM = i;
+			get_endpoint_table(SP_PC, &endpt_table_addr, &endpt_table_len);
+			cfg = endpt_table_addr;
+			i = 1;
+			while (endpt_table_len - (cfg - endpt_table_addr) >= 3) {
+				UENUM = i++;
 				en = pgm_read_byte(cfg++);
 				UECONX = en;
 				if (en) {
 					UECFG0X = pgm_read_byte(cfg++);
 					UECFG1X = pgm_read_byte(cfg++);
 				}
-			}
+			} 
         		UERST = 0x1E;
         		UERST = 0;
 			return;

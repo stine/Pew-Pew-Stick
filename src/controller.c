@@ -47,7 +47,7 @@ void init_controller(void)
   PORTD |= (1<<PD1);
 }
 
-void get_controller(char pins[MSG_LEN_BYTES])
+void get_controller(uint8_t pins[MSG_LEN_BYTES])
 {
   // Set SH/LD low.
   PORTD &= ~(1<<PD1);
