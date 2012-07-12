@@ -88,6 +88,18 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath=".\input_filter.c"
+			>
+		</File>
+		<File
+			RelativePath=".\input_filter.h"
+			>
+		</File>
+		<File
+			RelativePath=".\macros.h"
+			>
+		</File>
+		<File
 			RelativePath=".\Makefile"
 			>
 		</File>

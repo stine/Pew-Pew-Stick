@@ -28,20 +28,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <avr/pgmspace.h>
 
 #include "pins.h"
+#include "macros.h"
 #include "usb_gamepad.h"
 #include "controller.h"
-
-#define LED_ON		(PORTD |= (1<<6))
-#define LED_OFF		(PORTD &= ~(1<<6))
-#define LED_CONFIG	(DDRD |= (1<<6))
-#define CPU_PRESCALE(n)	(CLKPR = 0x80, CLKPR = (n))
+#include "input_filter.h"
 
 uint8_t pins[NUM_CONTROLLER_STATE_BYTES];
 
 int main(void)
 {
   /* Set 16 MHz clock */
-  CPU_PRESCALE(0x00);
+  CPU_PRESCALE(CPU_16MHz);
   LED_CONFIG;
   LED_ON;
 
@@ -51,14 +48,22 @@ int main(void)
 
   struct Controller controller;
 
+  struct InputFilter inputFilter;
+
   /* Initialize controller */
   init_controller(&controller, PARALLEL_TYPE);
+
+  /* Initialize controller input filter */
+  init_input_filter(&inputFilter);
 
   /* Main loop. */
   for(;;)
   {
     /* Get the current input state of the controller */
     get_controller_state(&controller, pins);
+
+    /* Filter the raw input data */
+    filter_input(&inputFilter, pins);
 
     /* Joystick motion */
     uint8_t x = DIR_NULL;

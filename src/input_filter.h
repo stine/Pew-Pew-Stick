@@ -24,25 +24,35 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <avr/io.h>
-#include <avr/pgmspace.h>
-#include "parallel_controller.h"
+#ifndef __INPUT_FILTER__
+#define __INPUT_FILTER__
+
+#include "pins.h"
 #include "macros.h"
+#include <stdint.h>
 
-void init_controller_parallel(void)
-{
-  DDRB |= PORT_CONFIG_INPUT; // Configure PortB as an input port
-  DDRD |= PORT_CONFIG_INPUT; // Configure PortD as an input port
-  PORTB |= (PINB_00 | PINB_01 | PINB_03); // Enable internal pull-up resistors
-  PORTD |= (PIND_01);
-}
+// Filters raw input from external mechanical devices.  Currently the code
+// only filters out jitter in the input data due to bouncing (switches).
 
-void get_controller_state_parallel(uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
+struct InputFilter
 {
-  pins[0] = 0;
-  pins[1] = 0;
-  pins[1] |= (PINB & PINB_00) ? 0 : D_UP;
-  pins[1] |= (PINB & PINB_01) ? 0 : D_DN;
-  pins[1] |= (PINB & PINB_03) ? 0 : D_LT;
-  pins[1] |= (PIND & PIND_01) ? 0 : D_RT;
-}
+  // Stores the state for each bit that was trusted as valid/stable input.
+  uint8_t lastTrustedInputBits[NUM_CONTROLLER_STATE_BYTES];
+
+  // Stores the previous state for each bit of input.
+  uint8_t lastInputBits[NUM_CONTROLLER_STATE_BYTES];
+
+  // Stores the number of times each input bit has matched the previous
+  // input bit state.  A value of 0xFF means the current bit value
+  // has not changed and is valid.
+  uint8_t inputBitStabilityCounter[NUM_CONTROLLER_STATE_BYTES][BITS_PER_BYTE];
+};
+
+// Initializes the passed in input filter.
+void init_input_filter(struct InputFilter* inputFilter);
+
+// Takes the raw input bit data and filters it, then overwrites the inputBits array with
+// the result.
+void filter_input(struct InputFilter* inputFilter, uint8_t inputBits[NUM_CONTROLLER_STATE_BYTES]);
+
+#endif //#ifndef __INPUT_FILTER__
