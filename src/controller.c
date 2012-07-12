@@ -1,6 +1,6 @@
 /*
   Pew Pew Stick Microcontroller Code
-  Copyright (c) 2012, Matt Stine
+  Copyright (c) 2012, Matt Stine, Brandon Booth
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -24,48 +24,36 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <avr/io.h>
-#include <avr/pgmspace.h>
 #include "controller.h"
-#include "pins.h"
+#include "serial_controller.h"
+#include "parallel_controller.h"
 
-void init_controller(void)
+void init_controller(struct Controller* controller, enum ControllerType controllerType)
 {
-  // Set SS, SCLK, and PD1 as output.
-  DDRB |= (1<<DDB0)|(1<<DDB1);
-  DDRD |= (1<<DDD1);
+  controller->controllerType = controllerType;
 
-  // Enable SPI, set to Master mode, clock idle low.
-  SPCR |= (1<<SPE)|(1<<MSTR);
-  SPCR &= ~(1<<CPOL);
-
-  // Set SCK frequency to fOSC/2.
-  SPSR |= (1<<SPI2X);
-
-  // Set Clock Inhibit and Parallel Load high by default.
-  PORTB |= (1<<PB0);
-  PORTD |= (1<<PD1);
+  switch(controllerType)
+  {
+  case SERIAL_TYPE:
+    init_controller_serial();
+    break;
+  case PARALLEL_TYPE:
+  default:
+    init_controller_parallel();
+    break;
+  }
 }
 
-void get_controller(uint8_t pins[MSG_LEN_BYTES])
+void get_controller_state(struct Controller* controller, uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
 {
-  // Set SH/LD low.
-  PORTD &= ~(1<<PD1);
-
-  // Simulate a clock tick to initiate Parallel load.
-  PORTB &= ~(1<<PB0);
-  PORTB |= (1<<PB0);
-
-  // Set SH/LD high.
-  PORTD |= (1<<PD1);
-
-  // Drop CLK INH, Load 8 bits from MISO, set CLK INH high again.
-  PORTB &= ~(1<<PB0);
-  for (unsigned i = 0; i < MSG_LEN_BYTES; ++i)
-    {
-      SPDR = 0x00;
-      while (!(SPSR & (1<<SPIF)));
-      pins[i] = SPDR;
-    }
-  PORTB |= (1<<PB0);
+  switch(controller->controllerType)
+  {
+  case SERIAL_TYPE:
+    get_controller_state_serial(pins);
+    break;
+  case PARALLEL_TYPE:
+  default:
+    get_controller_state_parallel(pins);
+    break;
+  }
 }

@@ -14,5 +14,6 @@
 *.user
 *.opensdf
 *.sdf
+*.ncb
 OldVersions/
 \#*\#

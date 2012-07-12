@@ -1,6 +1,6 @@
 /*
   Pew Pew Stick Microcontroller Code
-  Copyright (c) 2012, Matt Stine
+  Copyright (c) 2012, Matt Stine, Brandon Booth
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -24,51 +24,25 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef __PINS_H__
-#define __PINS_H__
+#include <avr/io.h>
+#include <avr/pgmspace.h>
+#include "parallel_controller.h"
+#include "macros.h"
 
-/* Number of bytes to store controller state */
-#define NUM_CONTROLLER_STATE_BYTES 2
+void init_controller_parallel(void)
+{
+  DDRB |= PORT_CONFIG_INPUT; // Configure PortB as an input port
+  DDRD |= PORT_CONFIG_INPUT; // Configure PortD as an input port
+  PORTB |= (PINB_00 | PINB_01 | PINB_03); // Enable internal pull-up resistors
+  PORTD |= (PIND_01);
+}
 
-/* First controller state byte's bit assignment */
-#define B_05 (1<<7)
-#define B_06 (1<<6)
-#define B_07 (1<<5)
-#define B_08 (1<<4)
-#define B_09 (1<<3)
-#define B_10 (1<<2)
-#define B_11 (1<<1)
-#define B_12 (1<<0)
-
-/* Second controller state byte's bit assignment */
-#define D_LT (1<<7)
-#define D_RT (1<<6)
-#define D_UP (1<<5)
-#define D_DN (1<<4)
-#define B_01 (1<<3)
-#define B_02 (1<<2)
-#define B_03 (1<<1)
-#define B_04 (1<<0)
-
-/* Axis values over USB */
-#define DIR_NULL (128)
-#define DIR_LEFT (0)
-#define DIR_RIGHT (255)
-#define DIR_UP (0)
-#define DIR_DOWN (255)
-
-/* Button values over USB (two bytes) */
-#define BUTTON_01 (1<<0)
-#define BUTTON_02 (1<<1)
-#define BUTTON_03 (1<<2)
-#define BUTTON_04 (1<<3)
-#define BUTTON_05 (1<<4)
-#define BUTTON_06 (1<<5)
-#define BUTTON_07 (1<<6)
-#define BUTTON_08 (1<<7)
-#define BUTTON_09 (1<<0)
-#define BUTTON_10 (1<<1)
-#define BUTTON_11 (1<<2)
-#define BUTTON_12 (1<<3)
-
-#endif
+void get_controller_state_parallel(uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
+{
+  pins[0] = 0;
+  pins[1] = 0;
+  pins[1] |= (PINB & PINB_00) ? 0 : D_UP;
+  pins[1] |= (PINB & PINB_01) ? 0 : D_DN;
+  pins[1] |= (PINB & PINB_03) ? 0 : D_LT;
+  pins[1] |= (PIND & PIND_01) ? 0 : D_RT;
+}

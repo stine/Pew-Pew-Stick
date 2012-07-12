@@ -1,6 +1,6 @@
 /*
   Pew Pew Stick Microcontroller Code
-  Copyright (c) 2012, Matt Stine
+  Copyright (c) 2012, Matt Stine, Brandon Booth
   All rights reserved.
 
   Redistribution and use in source and binary forms, with or without
@@ -24,51 +24,35 @@
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef __PINS_H__
-#define __PINS_H__
+#ifndef __INPUT_FILTER__
+#define __INPUT_FILTER__
 
-/* Number of bytes to store controller state */
-#define NUM_CONTROLLER_STATE_BYTES 2
+#include "pins.h"
+#include "macros.h"
+#include <stdint.h>
 
-/* First controller state byte's bit assignment */
-#define B_05 (1<<7)
-#define B_06 (1<<6)
-#define B_07 (1<<5)
-#define B_08 (1<<4)
-#define B_09 (1<<3)
-#define B_10 (1<<2)
-#define B_11 (1<<1)
-#define B_12 (1<<0)
+// Filters raw input from external mechanical devices.  Currently the code
+// only filters out jitter in the input data due to bouncing (switches).
 
-/* Second controller state byte's bit assignment */
-#define D_LT (1<<7)
-#define D_RT (1<<6)
-#define D_UP (1<<5)
-#define D_DN (1<<4)
-#define B_01 (1<<3)
-#define B_02 (1<<2)
-#define B_03 (1<<1)
-#define B_04 (1<<0)
+struct InputFilter
+{
+  // Stores the state for each bit that was trusted as valid/stable input.
+  uint8_t lastTrustedInputBits[NUM_CONTROLLER_STATE_BYTES];
 
-/* Axis values over USB */
-#define DIR_NULL (128)
-#define DIR_LEFT (0)
-#define DIR_RIGHT (255)
-#define DIR_UP (0)
-#define DIR_DOWN (255)
+  // Stores the previous state for each bit of input.
+  uint8_t lastInputBits[NUM_CONTROLLER_STATE_BYTES];
 
-/* Button values over USB (two bytes) */
-#define BUTTON_01 (1<<0)
-#define BUTTON_02 (1<<1)
-#define BUTTON_03 (1<<2)
-#define BUTTON_04 (1<<3)
-#define BUTTON_05 (1<<4)
-#define BUTTON_06 (1<<5)
-#define BUTTON_07 (1<<6)
-#define BUTTON_08 (1<<7)
-#define BUTTON_09 (1<<0)
-#define BUTTON_10 (1<<1)
-#define BUTTON_11 (1<<2)
-#define BUTTON_12 (1<<3)
+  // Stores the number of times each input bit has matched the previous
+  // input bit state.  A value of 0xFF means the current bit value
+  // has not changed and is valid.
+  uint8_t inputBitStabilityCounter[NUM_CONTROLLER_STATE_BYTES][BITS_PER_BYTE];
+};
 
-#endif
+// Initializes the passed in input filter.
+void init_input_filter(struct InputFilter* inputFilter);
+
+// Takes the raw input bit data and filters it, then overwrites the inputBits array with
+// the result.
+void filter_input(struct InputFilter* inputFilter, uint8_t inputBits[NUM_CONTROLLER_STATE_BYTES]);
+
+#endif //#ifndef __INPUT_FILTER__
