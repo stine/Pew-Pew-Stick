@@ -30,11 +30,6 @@
 #include "pins.h"
 #include <stdint.h>
 
-#define PINB_00 (1<<0)
-#define PINB_01 (1<<1)
-#define PINB_03 (1<<3)
-#define PIND_01 (1<<1)
-
 // Reads controller state input from multiple pins with each input device
 // attached to a separate pin.  This controller aims to minimize the number
 // of electrical components required to build the controller circuit.
