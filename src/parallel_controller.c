@@ -31,12 +31,14 @@
 
 void init_controller_parallel(void)
 {
-  DDRB |= PORT_CONFIG_INPUT; // Configure PortB as an input port
-  DDRD |= PORT_CONFIG_INPUT; // Configure PortD as an input port
-  DDRF |= PORT_CONFIG_INPUT; // Configure PortF as an input port
-  PORTB |= (PIN_00 | PIN_01 | PIN_03 | PIN_04 | PIN_05 | PIN_06); // Enable internal pull-up resistors
-  PORTD |= (PIN_01);
-  PORTF |= (PIN_01 | PIN_04 | PIN_05 | PIN_06 | PIN_07);
+  DDRB |= PORT_CONFIG_INPUT; // Configure ports B, C, D, and F as input ports
+  DDRC |= PORT_CONFIG_INPUT;
+  DDRD |= PORT_CONFIG_INPUT;
+  DDRF |= PORT_CONFIG_INPUT;
+  PORTB |= (PIN_00 | PIN_01 | PIN_03 | PIN_04 | PIN_05 | PIN_06 | PIN_07); // Enable internal pull-up resistors
+  PORTC |= (PIN_06);
+  PORTD |= (PIN_02 | PIN_03 | PIN_07);
+  PORTF |= (PIN_00 | PIN_01 | PIN_04 | PIN_05 | PIN_06 | PIN_07);
 }
 
 void get_controller_state_parallel(uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
@@ -47,12 +49,15 @@ void get_controller_state_parallel(uint8_t pins[NUM_CONTROLLER_STATE_BYTES])
   pins[0] |= (PINB & PIN_06) ? 0 : B_06;
   pins[0] |= (PINB & PIN_05) ? 0 : B_07;
   pins[0] |= (PINB & PIN_04) ? 0 : B_08;
-  pins[1] |= (PINB & PIN_00) ? 0 : D_UP;
-  pins[1] |= (PINB & PIN_01) ? 0 : D_DN;
-  pins[1] |= (PINB & PIN_03) ? 0 : D_LT;
-  pins[1] |= (PIND & PIN_01) ? 0 : D_RT;
-  pins[1] |= (PINF & PIN_01) ? 0 : B_01;
-  pins[1] |= (PINF & PIN_04) ? 0 : B_02;
-  pins[1] |= (PINF & PIN_05) ? 0 : B_03;
+  pins[0] |= (PIND & PIN_02) ? 0 : B_09;
+  pins[0] |= (PIND & PIN_03) ? 0 : B_10;
+  pins[0] |= (PIND & PIN_07) ? 0 : B_11;
+  pins[1] |= (PINF & PIN_00) ? 0 : D_UP;
+  pins[1] |= (PINF & PIN_01) ? 0 : D_DN;
+  pins[1] |= (PINF & PIN_04) ? 0 : D_LT;
+  pins[1] |= (PINF & PIN_05) ? 0 : D_RT;
+  pins[1] |= (PINB & PIN_03) ? 0 : B_01;
+  pins[1] |= (PINB & PIN_07) ? 0 : B_02;
+  pins[1] |= (PINC & PIN_06) ? 0 : B_03;
   pins[1] |= (PINF & PIN_06) ? 0 : B_04;
 }
