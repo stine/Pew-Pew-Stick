@@ -15,5 +15,6 @@
 *.opensdf
 *.sdf
 *.ncb
+*.lck
 OldVersions/
 \#*\#
