@@ -12,6 +12,16 @@
 #define CPU_125kHz      0x07
 #define CPU_62kHz       0x08
 
+#define PIN_00 (1<<0)
+#define PIN_01 (1<<1)
+#define PIN_02 (1<<2)
+#define PIN_03 (1<<3)
+#define PIN_04 (1<<4)
+#define PIN_05 (1<<5)
+#define PIN_06 (1<<6)
+#define PIN_07 (1<<7)
+#define PIN_08 (1<<8)
+
 #define LED_CONFIG	(DDRD |= (1<<6))
 #define LED_OFF		(PORTD &= ~(1<<6))
 #define LED_ON		(PORTD |= (1<<6))
